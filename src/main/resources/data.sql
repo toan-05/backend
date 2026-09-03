@@ -1,0 +1,18 @@
+INSERT INTO accounts (username, email, password, full_name, status, role) VALUES
+('admin', 'admin@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'Admin', 'ACTIVE', 'ADMIN'),
+('user1', 'user1@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user2', 'user2@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'INACTIVE', 'USER'),
+('user3', 'user3@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user4', 'user4@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'ACTIVE', 'USER'),
+('user5', 'user5@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user6', 'user6@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'ACTIVE', 'USER'),
+('user7', 'user7@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user8', 'user8@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'ACTIVE', 'USER'),
+('user9', 'user9@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user10', 'user10@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'ACTIVE', 'USER'),
+('user11', 'user11@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user12', 'user12@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'ACTIVE', 'USER'),
+('user13', 'user13@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user14', 'user14@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'ACTIVE', 'USER'),
+('user15', 'user15@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User One', 'ACTIVE', 'USER'),
+('user16', 'user16@gmail.com', '$2a$10$8hlo6XgoYz7bpWCH8aE.bO2GbDNyGXtPr6pnNOnGXENZY9s1XYo9m', 'User Two', 'INACTIVE', 'USER');
