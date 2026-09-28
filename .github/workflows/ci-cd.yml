@@ -1,6 +1,15 @@
 name: Backend CI/CD
 
 on:
+  pull_request:
+    branches:
+      - dev
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
   push:
     branches:
       - dev
@@ -10,15 +19,16 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: backend-dev-deployment
-  cancel-in-progress: false
-
 jobs:
   ci:
     name: Test Backend
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
+    concurrency:
+      group: backend-ci-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
 
     services:
       mysql:
@@ -58,6 +68,7 @@ jobs:
   deploy:
     name: Deploy Backend
     needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on:
       - self-hosted
       - Linux
@@ -65,6 +76,10 @@ jobs:
 
     timeout-minutes: 15
     environment: development
+
+    concurrency:
+      group: backend-dev-deployment
+      cancel-in-progress: false
 
     env:
       ENV_FILE: /home/toan/backend/.env
