@@ -1,42 +1,155 @@
 name: Backend CI/CD
 
 on:
+  pull_request:
+    branches:
+      - dev
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
   push:
     branches:
       - dev
 
-jobs:
+  workflow_dispatch:
 
+permissions:
+  contents: read
+
+jobs:
   ci:
-    name: Build Backend
-    runs-on: self-hosted
+    name: Test Backend
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    concurrency:
+      group: backend-ci-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: admin_db
+          MYSQL_ROOT_PASSWORD: testpass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -ptestpass"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=15
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
+          cache: maven
 
-      - name: Build
+      - name: Build and test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/admin_db?serverTimezone=UTC
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: testpass
+          SPRING_SQL_INIT_MODE: always
         run: |
           chmod +x mvnw
-          ./mvnw clean package -DskipTests
-
+          ./mvnw -B verify
 
   deploy:
     name: Deploy Backend
     needs: ci
-    runs-on: self-hosted
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+
+    timeout-minutes: 15
+    environment: development
+
+    concurrency:
+      group: backend-dev-deployment
+      cancel-in-progress: false
+
+    env:
+      ENV_FILE: /home/toan/backend/.env
+      COMPOSE_PROJECT_NAME: account-manager
+      BACKEND_SERVICE: backend
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
+      - name: Checkout exact tested commit
+        uses: actions/checkout@v7
 
-      - name: Deploy with Docker Compose
+      - name: Validate deployment configuration
         run: |
-          docker compose up -d --build backend
-          docker compose ps
+          set -euo pipefail
+
+          test -f "$ENV_FILE"
+
+          docker compose \
+            --env-file "$ENV_FILE" \
+            config --quiet
+
+      - name: Build backend image
+        run: |
+          set -euo pipefail
+
+          docker compose \
+            --env-file "$ENV_FILE" \
+            build "$BACKEND_SERVICE"
+
+      - name: Deploy backend
+        run: |
+          set -euo pipefail
+
+          docker compose \
+            --env-file "$ENV_FILE" \
+            up -d --no-build "$BACKEND_SERVICE"
+
+          docker compose \
+            --env-file "$ENV_FILE" \
+            ps
+
+      - name: Verify container
+        run: |
+          set -euo pipefail
+
+          container_id="$(docker compose \
+            --env-file "$ENV_FILE" \
+            ps -q "$BACKEND_SERVICE")"
+
+          test -n "$container_id"
+
+          for attempt in $(seq 1 30); do
+            status="$(docker inspect \
+              --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \
+              "$container_id")"
+
+            if [ "$status" = "healthy" ]; then
+              echo "Backend is healthy"
+              exit 0
+            fi
+
+            if [ "$status" = "exited" ] || [ "$status" = "dead" ]; then
+              break
+            fi
+
+            echo "Waiting for backend health check ($attempt/30): $status"
+            sleep 2
+          done
+
+          docker compose \
+            --env-file "$ENV_FILE" \
+            logs --no-color --tail 100 "$BACKEND_SERVICE"
+
+          exit 1
