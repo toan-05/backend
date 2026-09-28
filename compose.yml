@@ -1,0 +1,32 @@
+services:
+
+  mysql:
+    image: mysql:8.4
+    container_name: mysql-admin
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456789
+      MYSQL_DATABASE: admin_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - admin-network
+
+  backend:
+    build: .
+    container_name: admin-backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/admin_db?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: 123456789
+    depends_on:
+      - mysql
+    networks:
+      - admin-network
+
+networks:
+  admin-network:
+
+volumes:
+  mysql-data:
